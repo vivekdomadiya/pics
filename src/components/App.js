@@ -21,6 +21,8 @@ export class App extends Component {
     this.setState({ loader: true });
     const { images, term, page } = this.state;
 
+    if (!term) return false;
+
     const response = await unslash.get("/search/photos", {
       params: { query: term, per_page: 20, page: page },
     });
@@ -41,6 +43,7 @@ export class App extends Component {
     await this.setState({
       term: term,
       page: 1,
+      images: [],
     });
 
     this.getPhotos();
@@ -62,7 +65,7 @@ export class App extends Component {
 
   render() {
     return (
-      <div className="ui container">
+      <div className="ui container" style={{ paddingTop: "2rem" }}>
         <SearchBar onSubmit={this.handleSubmit} />
 
         <div style={{ marginBottom: "1rem" }} className="ui large label">
