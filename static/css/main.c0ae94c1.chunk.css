@@ -1,0 +1,2 @@
+.image-list{display:grid;text-align:center;grid-template-columns:repeat(var(--columns),1fr);grid-column-gap:10px}.image-list img{width:100%}.image-card{padding-bottom:10px}
+/*# sourceMappingURL=main.c0ae94c1.chunk.css.map */
