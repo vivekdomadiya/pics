@@ -1,83 +1,69 @@
-import React, { Component } from "react";
-import SearchBar from "./SearchBar";
-import unslash from "../api/unslash";
-import ImageList from "./ImageList";
-import Loader from "./Loader";
+import React, { useState } from 'react';
+import SearchBar from './SearchBar';
+import unslash from '../api/unslash';
+import ImageList from './ImageList';
+import Loader from './Loader';
 
-export class App extends Component {
-  constructor(props) {
-    super(props);
+const initialData = {
+  images: [],
+  total: 0,
+  totalPage: 0,
+  page: 0,
+};
 
-    this.state = {
-      images: [],
-      term: "",
-      page: 1,
-      total: 0,
-      loader: false,
-    };
-  }
+const App = () => {
+  const [term, setTerm] = useState('');
+  const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(false);
 
-  getPhotos = async () => {
-    this.setState({ loader: true });
-    const { images, term, page } = this.state;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setData(initialData);
+    loadPhotos();
+  };
 
+  const loadPhotos = async () => {
     if (!term) return false;
+    setLoading(true);
 
-    const response = await unslash.get("/search/photos", {
-      params: { query: term, per_page: 20, page: page },
+    const response = await unslash.get('/search/photos', {
+      params: { query: term, per_page: 20, page: data.page + 1 },
     });
 
     if (!response.data) {
+      setLoading(false);
       return false;
     }
 
-    this.setState({
-      images: images.concat(response.data.results),
-      page: page + 1,
+    setData((data) => ({
+      images: data.images.concat(response.data.results),
+      page: data.page + 1,
       total: response.data.total,
-      loader: false,
-    });
+      totalPage: response.data.total_pages,
+    }));
+    setLoading(false);
   };
 
-  handleSubmit = async (term) => {
-    await this.setState({
-      term: term,
-      page: 1,
-      images: [],
-    });
+  return (
+    <div className="ui container" style={{ paddingTop: '2rem' }}>
+      <SearchBar term={term} setTerm={setTerm} onSubmit={handleSearch} />
 
-    this.getPhotos();
-  };
-
-  componentDidMount() {
-    window.addEventListener("scroll", async () => {
-      const {
-        scrollTop,
-        clientHeight,
-        scrollHeight,
-      } = document.documentElement;
-
-      if (scrollTop + clientHeight >= scrollHeight - 20) {
-        this.getPhotos();
-      }
-    });
-  }
-
-  render() {
-    return (
-      <div className="ui container" style={{ paddingTop: "2rem" }}>
-        <SearchBar onSubmit={this.handleSubmit} />
-
-        <div style={{ marginBottom: "1rem" }} className="ui large label">
-          Found: {this.state.total} images
+      {loading && data.page === 0 ? (
+        <Loader />
+      ) : data.page === 1 && data.images.length === 0 ? (
+        <div style={{ marginBottom: '1rem' }} className="ui red large label">
+          NO Images Found!!
         </div>
-
-        <ImageList images={this.state.images} />
-
-        {this.state.loader ? <Loader /> : ""}
-      </div>
-    );
-  }
-}
+      ) : (
+        <>
+          <div style={{ marginBottom: '1rem' }} className="ui large label">
+            Found: {data.total} images
+          </div>
+          <ImageList data={data} loadPhotos={loadPhotos} />
+        </>
+      )}
+    </div>
+  );
+};
 
 export default App;
