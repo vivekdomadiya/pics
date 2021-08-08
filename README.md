@@ -2,7 +2,7 @@
 
 Search beautiful images and photo.
 
-[(◔‿◔)!☞ Live Demo](https://vivekdomadia.github.io/pics/)
+[(◔‿◔)!☞ Live Demo](https://vivekdomadiya.github.io/pics/)
 
 #### Platforms / Technologies
 
